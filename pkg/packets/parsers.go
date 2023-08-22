@@ -1,13 +1,13 @@
 package packets
 
 import (
-	"bytes"
+	"bufio"
 	"reflect"
 )
 
 type FieldParser interface {
 	Marshal(reflect.Value) ([]byte, error)
-	Unmarshal(*bytes.Reader, reflect.Value) error
+	Unmarshal(*bufio.Reader, reflect.Value) error
 }
 
 var parsers = map[string]FieldParser{}

@@ -1,7 +1,7 @@
 package parsers
 
 import (
-	"bytes"
+	"bufio"
 	"reflect"
 
 	"github.com/meir/mc1.20/pkg/packets"
@@ -19,22 +19,20 @@ type StringParser struct {
 	varintParser *VarintParser
 }
 
-func (p *StringParser) Unmarshal(data *bytes.Reader, value reflect.Value) error {
-	if value.Kind() != reflect.Ptr {
-		return &packets.ErrInvalidKind{
-			value.Kind(),
-			reflect.Ptr,
-		}
+func (p *StringParser) Unmarshal(data *bufio.Reader, value reflect.Value) error {
+	if value.Kind() == reflect.Ptr {
+		value = value.Elem()
 	}
 
-	if value.Elem().Kind() != reflect.String {
+	if value.Kind() != reflect.String {
 		return &packets.ErrInvalidKind{
-			value.Elem().Kind(),
+			"string",
+			value.Kind(),
 			reflect.String,
 		}
 	}
 
-	length := int32(0)
+	length := 0
 	err := p.varintParser.Unmarshal(data, reflect.ValueOf(&length))
 	if err != nil {
 		return err
@@ -63,7 +61,7 @@ func (p *StringParser) Unmarshal(data *bytes.Reader, value reflect.Value) error 
 		return err
 	}
 
-	value.Elem().SetString(string(bytes))
+	value.SetString(string(bytes))
 	return nil
 }
 
@@ -74,6 +72,7 @@ func (p *StringParser) Marshal(value reflect.Value) ([]byte, error) {
 
 	if value.Kind() != reflect.String {
 		return nil, &packets.ErrInvalidKind{
+			"string",
 			value.Kind(),
 			reflect.String,
 		}

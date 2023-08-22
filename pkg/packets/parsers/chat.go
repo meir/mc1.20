@@ -1,7 +1,7 @@
 package parsers
 
 import (
-	"bytes"
+	"bufio"
 	"encoding/json"
 	"reflect"
 
@@ -25,24 +25,22 @@ type ChatParser struct {
 	chatType     reflect.Type
 }
 
-func (p *ChatParser) Unmarshal(data *bytes.Reader, value reflect.Value) error {
-	if value.Kind() != reflect.Ptr {
-		return &packets.ErrInvalidKind{
-			value.Kind(),
-			reflect.Ptr,
-		}
+func (p *ChatParser) Unmarshal(data *bufio.Reader, value reflect.Value) error {
+	if value.Kind() == reflect.Ptr {
+		value = value.Elem()
 	}
 
-	if value.Elem().Kind() != reflect.Struct {
+	if value.Kind() != reflect.Struct {
 		return &packets.ErrInvalidKind{
-			value.Elem().Kind(),
+			"chat",
+			value.Kind(),
 			reflect.Struct,
 		}
 	}
 
-	if value.Elem().Type() != p.chatType {
+	if value.Type() != p.chatType {
 		return &packets.ErrInvalidType{
-			value.Elem().Type(),
+			value.Type(),
 			p.chatType,
 		}
 	}
@@ -57,7 +55,7 @@ func (p *ChatParser) Unmarshal(data *bytes.Reader, value reflect.Value) error {
 		return err
 	}
 
-	value.Elem().Set(reflect.ValueOf(chat))
+	value.Set(reflect.ValueOf(chat))
 
 	return nil
 }
@@ -69,6 +67,7 @@ func (p *ChatParser) Marshal(value reflect.Value) ([]byte, error) {
 
 	if value.Kind() != reflect.Struct {
 		return nil, &packets.ErrInvalidKind{
+			"chat",
 			value.Kind(),
 			reflect.Struct,
 		}

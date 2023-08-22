@@ -1,7 +1,7 @@
 package parsers
 
 import (
-	"bytes"
+	"bufio"
 	"reflect"
 
 	"github.com/meir/mc1.20/pkg/packets"
@@ -28,24 +28,22 @@ type EnitytMetadataParser struct {
 	varintParser *VarintParser
 }
 
-func (p *EnitytMetadataParser) Unmarshal(data *bytes.Reader, value reflect.Value) error {
-	if value.Kind() != reflect.Ptr {
-		return &packets.ErrInvalidKind{
-			value.Kind(),
-			reflect.Ptr,
-		}
+func (p *EnitytMetadataParser) Unmarshal(data *bufio.Reader, value reflect.Value) error {
+	if value.Kind() == reflect.Ptr {
+		value = value.Elem()
 	}
 
 	if value.Elem().Kind() != reflect.Struct {
 		return &packets.ErrInvalidKind{
-			value.Elem().Kind(),
+			"metadata",
+			value.Kind(),
 			reflect.Struct,
 		}
 	}
 
-	if value.Elem().Type() != p.entityMetadataType {
+	if value.Type() != p.entityMetadataType {
 		return &packets.ErrInvalidType{
-			value.Elem().Type(),
+			value.Type(),
 			p.entityMetadataType,
 		}
 	}
@@ -60,7 +58,7 @@ func (p *EnitytMetadataParser) Unmarshal(data *bytes.Reader, value reflect.Value
 	metadata.Index = b
 
 	if b == 0xff {
-		value.Elem().Set(reflect.ValueOf(metadata))
+		value.Set(reflect.ValueOf(metadata))
 		return nil
 	}
 
@@ -81,6 +79,7 @@ func (p *EnitytMetadataParser) Marshal(value reflect.Value) ([]byte, error) {
 
 	if value.Kind() != reflect.Struct {
 		return nil, &packets.ErrInvalidKind{
+			"metadata",
 			value.Kind(),
 			reflect.Struct,
 		}
@@ -124,7 +123,7 @@ func (p *EnitytMetadataParser) Marshal(value reflect.Value) ([]byte, error) {
 type MetadataValueParser struct {
 }
 
-func (p *MetadataValueParser) Unmarshal(data *bytes.Reader, value reflect.Value) error {
+func (p *MetadataValueParser) Unmarshal(data *bufio.Reader, value reflect.Value) error {
 	return nil
 }
 

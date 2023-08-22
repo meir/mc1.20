@@ -1,7 +1,7 @@
 package parsers
 
 import (
-	"bytes"
+	"bufio"
 	"encoding/binary"
 	"reflect"
 
@@ -9,40 +9,38 @@ import (
 )
 
 func init() {
-	packets.RegisterParser("int8", &IntParser{8, reflect.Int8})
-	packets.RegisterParser("uint8", &IntParser{8, reflect.Uint8})
-	packets.RegisterParser("int16", &IntParser{16, reflect.Int16})
-	packets.RegisterParser("uint16", &IntParser{16, reflect.Uint16})
-	packets.RegisterParser("int32", &IntParser{32, reflect.Int32})
-	packets.RegisterParser("uint32", &IntParser{32, reflect.Uint32})
-	packets.RegisterParser("int64", &IntParser{64, reflect.Int64})
-	packets.RegisterParser("uint64", &IntParser{64, reflect.Uint64})
+	packets.RegisterParser("int8", &IntParser{8, false, reflect.Int8})
+	packets.RegisterParser("uint8", &IntParser{8, true, reflect.Uint8})
+	packets.RegisterParser("int16", &IntParser{16, false, reflect.Int16})
+	packets.RegisterParser("uint16", &IntParser{16, true, reflect.Uint16})
+	packets.RegisterParser("int32", &IntParser{32, false, reflect.Int32})
+	packets.RegisterParser("uint32", &IntParser{32, true, reflect.Uint32})
+	packets.RegisterParser("int64", &IntParser{64, false, reflect.Int64})
+	packets.RegisterParser("uint64", &IntParser{64, true, reflect.Uint64})
 
-	packets.RegisterParser("int", &IntParser{32, reflect.Int32})
-	packets.RegisterParser("uint", &IntParser{32, reflect.Uint32})
+	packets.RegisterParser("int", &IntParser{32, false, reflect.Int32})
+	packets.RegisterParser("uint", &IntParser{32, true, reflect.Uint32})
 
-	packets.RegisterParser("short", &IntParser{16, reflect.Int16})
-	packets.RegisterParser("ushort", &IntParser{16, reflect.Uint16})
-	packets.RegisterParser("long", &IntParser{64, reflect.Int64})
-	packets.RegisterParser("ulong", &IntParser{64, reflect.Uint64})
+	packets.RegisterParser("short", &IntParser{16, false, reflect.Int16})
+	packets.RegisterParser("ushort", &IntParser{16, true, reflect.Uint16})
+	packets.RegisterParser("long", &IntParser{64, false, reflect.Int64})
+	packets.RegisterParser("ulong", &IntParser{64, true, reflect.Uint64})
 }
 
 type IntParser struct {
-	bits int
-	kind reflect.Kind
+	bits     int
+	unsigned bool
+	kind     reflect.Kind
 }
 
-func (p *IntParser) Unmarshal(data *bytes.Reader, value reflect.Value) error {
-	if value.Kind() != reflect.Ptr {
-		return &packets.ErrInvalidKind{
-			Kind:   value.Kind(),
-			Wanted: reflect.Ptr,
-		}
+func (p *IntParser) Unmarshal(data *bufio.Reader, value reflect.Value) error {
+	if value.Kind() == reflect.Ptr {
+		value = value.Elem()
 	}
 
-	if value.Elem().Kind() != p.kind {
+	if value.Kind() != p.kind {
 		return &packets.ErrInvalidKind{
-			Kind:   value.Elem().Kind(),
+			Kind:   value.Kind(),
 			Wanted: p.kind,
 		}
 	}
@@ -64,7 +62,11 @@ func (p *IntParser) Unmarshal(data *bytes.Reader, value reflect.Value) error {
 		v = int64(binary.BigEndian.Uint64(b))
 	}
 
-	value.Elem().SetInt(v)
+	if p.unsigned {
+		value.SetUint(uint64(v))
+	} else {
+		value.SetInt(v)
+	}
 
 	return nil
 }

@@ -1,7 +1,7 @@
 package parsers
 
 import (
-	"bytes"
+	"bufio"
 	"reflect"
 	"regexp"
 
@@ -24,17 +24,14 @@ type IdentifierParser struct {
 	rule         *regexp.Regexp
 }
 
-func (p *IdentifierParser) Unmarshal(data *bytes.Reader, value reflect.Value) error {
-	if value.Kind() != reflect.Ptr {
-		return &packets.ErrInvalidKind{
-			Kind:   value.Kind(),
-			Wanted: reflect.Ptr,
-		}
+func (p *IdentifierParser) Unmarshal(data *bufio.Reader, value reflect.Value) error {
+	if value.Kind() == reflect.Ptr {
+		value = value.Elem()
 	}
 
-	if value.Elem().Kind() != reflect.String {
+	if value.Kind() != reflect.String {
 		return &packets.ErrInvalidKind{
-			Kind:   value.Elem().Kind(),
+			Kind:   value.Kind(),
 			Wanted: reflect.String,
 		}
 	}
@@ -51,7 +48,7 @@ func (p *IdentifierParser) Unmarshal(data *bytes.Reader, value reflect.Value) er
 		}
 	}
 
-	value.Elem().SetString(s)
+	value.SetString(s)
 
 	return nil
 }

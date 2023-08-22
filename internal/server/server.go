@@ -4,6 +4,10 @@ import (
 	"fmt"
 	"net"
 
+	_ "github.com/meir/mc1.20/pkg/connection/handlers/handshake"
+	_ "github.com/meir/mc1.20/pkg/connection/handlers/status"
+	_ "github.com/meir/mc1.20/pkg/packets/parsers"
+
 	"github.com/meir/mc1.20/pkg/connection"
 	"golang.org/x/exp/slog"
 )
@@ -29,6 +33,8 @@ func (s *Server) Listen() error {
 			return err
 		}
 
-		go connection.NewConnection(conn)
+		slog.Info("new connection", "ip", conn.RemoteAddr().String())
+
+		go connection.NewConnection(conn).Manage()
 	}
 }

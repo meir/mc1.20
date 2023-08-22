@@ -1,7 +1,7 @@
 package parsers
 
 import (
-	"bytes"
+	"bufio"
 	"reflect"
 
 	"github.com/meir/mc1.20/pkg/packets"
@@ -15,18 +15,16 @@ func init() {
 // bool bytes are either 0x01 or 0x00
 type BoolParser struct{}
 
-func (p *BoolParser) Unmarshal(data *bytes.Reader, value reflect.Value) error {
-	if value.Kind() != reflect.Ptr {
-		return &packets.ErrInvalidKind{
-			Kind:   value.Kind(),
-			Wanted: reflect.Ptr,
-		}
+func (p *BoolParser) Unmarshal(data *bufio.Reader, value reflect.Value) error {
+	if value.Kind() == reflect.Ptr {
+		value = value.Elem()
 	}
 
-	if value.Elem().Kind() != reflect.Bool {
+	if value.Kind() != reflect.Bool {
 		return &packets.ErrInvalidKind{
-			Kind:   value.Kind(),
-			Wanted: reflect.Bool,
+			"bool",
+			value.Kind(),
+			reflect.Bool,
 		}
 	}
 
@@ -35,7 +33,7 @@ func (p *BoolParser) Unmarshal(data *bytes.Reader, value reflect.Value) error {
 		return err
 	}
 
-	value.Elem().SetBool(int(b) > 0)
+	value.SetBool(int(b) > 0)
 
 	return nil
 }
@@ -47,6 +45,7 @@ func (p *BoolParser) Marshal(value reflect.Value) ([]byte, error) {
 
 	if value.Kind() != reflect.Bool {
 		return nil, &packets.ErrInvalidKind{
+			"bool",
 			value.Kind(),
 			reflect.Bool,
 		}

@@ -1,7 +1,7 @@
 package parsers
 
 import (
-	"bytes"
+	"bufio"
 	"encoding/binary"
 	"math"
 	"reflect"
@@ -22,17 +22,14 @@ type FloatParser struct {
 	kind reflect.Kind
 }
 
-func (p *FloatParser) Unmarshal(data *bytes.Reader, value reflect.Value) error {
-	if value.Kind() != reflect.Ptr {
-		return &packets.ErrInvalidKind{
-			Kind:   value.Kind(),
-			Wanted: reflect.Ptr,
-		}
+func (p *FloatParser) Unmarshal(data *bufio.Reader, value reflect.Value) error {
+	if value.Kind() == reflect.Ptr {
+		value = value.Elem()
 	}
 
-	if value.Elem().Kind() != p.kind {
+	if value.Kind() != p.kind {
 		return &packets.ErrInvalidKind{
-			Kind:   value.Elem().Kind(),
+			Kind:   value.Kind(),
 			Wanted: p.kind,
 		}
 	}
@@ -53,7 +50,7 @@ func (p *FloatParser) Unmarshal(data *bytes.Reader, value reflect.Value) error {
 		v = math.Float64frombits(bits)
 	}
 
-	value.Elem().SetFloat(v)
+	value.SetFloat(v)
 
 	return nil
 }

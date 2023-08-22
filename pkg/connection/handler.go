@@ -1,12 +1,12 @@
 package connection
 
 import (
-	"bytes"
+	"bufio"
 
 	"github.com/meir/mc1.20/pkg/packets"
 )
 
-type PacketHandler func(conn *Connection, reader *bytes.Reader, packet packets.Packet) (bool, error)
+type PacketHandler func(conn *Connection, reader *bufio.Reader, packet packets.Packet) (bool, error)
 
 type ConnectionState int
 
@@ -19,7 +19,7 @@ const (
 
 type Handlers []PacketHandler
 
-func (h Handlers) Handle(conn *Connection, reader *bytes.Reader, packet packets.Packet) (bool, error) {
+func (h Handlers) Handle(conn *Connection, reader *bufio.Reader, packet packets.Packet) (bool, error) {
 	for _, handler := range h {
 		ok, err := handler(conn, reader, packet)
 		if err != nil {
@@ -34,7 +34,7 @@ func (h Handlers) Handle(conn *Connection, reader *bytes.Reader, packet packets.
 	return false, nil
 }
 
-var handlers map[ConnectionState]map[PacketId]Handlers
+var handlers map[ConnectionState]map[PacketId]Handlers = map[ConnectionState]map[PacketId]Handlers{}
 
 func RegisterHandler(state ConnectionState, event PacketId, handler PacketHandler) {
 	if _, ok := handlers[state]; !ok {

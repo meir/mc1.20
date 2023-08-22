@@ -8,12 +8,13 @@ import (
 var ErrVarintTooBig = fmt.Errorf("varint is too big")
 
 type ErrInvalidKind struct {
+	Parser string
 	Kind   reflect.Kind
 	Wanted reflect.Kind
 }
 
 func (e *ErrInvalidKind) Error() string {
-	return fmt.Sprintf("invalid kind: %s, wanted: %s", e.Kind, e.Wanted)
+	return fmt.Sprintf("invalid kind on parser for %s: %s, wanted: %s", e.Parser, e.Kind, e.Wanted)
 }
 
 type ErrInvalidType struct {

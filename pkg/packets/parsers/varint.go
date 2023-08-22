@@ -1,15 +1,18 @@
 package parsers
 
 import (
-	"bytes"
+	"bufio"
 	"reflect"
 
 	"github.com/meir/mc1.20/pkg/packets"
+	"golang.org/x/exp/slices"
 )
 
 func init() {
+	packets.RegisterParser("varint", &VarintParser{32})
 	packets.RegisterParser("varint32", &VarintParser{32})
 	packets.RegisterParser("varint64", &VarintParser{64})
+	packets.RegisterParser("varlong", &VarintParser{64})
 }
 
 type VarintParser struct {
@@ -19,17 +22,21 @@ type VarintParser struct {
 const SEGMENT_BITS byte = 0x7f
 const CONTINUE_BIT byte = 0x80
 
-func (p *VarintParser) Unmarshal(data *bytes.Reader, value reflect.Value) error {
-	if value.Kind() != reflect.Ptr {
-		return &packets.ErrInvalidKind{
-			value.Kind(),
-			reflect.Ptr,
-		}
+func (p *VarintParser) Unmarshal(data *bufio.Reader, value reflect.Value) error {
+	if value.Kind() == reflect.Ptr {
+		value = value.Elem()
 	}
 
-	if value.Elem().Kind() != reflect.Int {
+	if !slices.Contains([]reflect.Kind{
+		reflect.Int,
+		reflect.Int8,
+		reflect.Int16,
+		reflect.Int32,
+		reflect.Int64,
+	}, value.Kind()) {
 		return &packets.ErrInvalidKind{
-			value.Elem().Kind(),
+			"varint",
+			value.Kind(),
 			reflect.Int,
 		}
 	}
@@ -58,7 +65,7 @@ func (p *VarintParser) Unmarshal(data *bytes.Reader, value reflect.Value) error 
 	}
 
 	// set value
-	value.Elem().SetInt(v)
+	value.SetInt(v)
 
 	return nil
 }
@@ -68,8 +75,15 @@ func (p *VarintParser) Marshal(data reflect.Value) ([]byte, error) {
 		data = data.Elem()
 	}
 
-	if data.Kind() != reflect.Int {
+	if !slices.Contains([]reflect.Kind{
+		reflect.Int,
+		reflect.Int8,
+		reflect.Int16,
+		reflect.Int32,
+		reflect.Int64,
+	}, data.Kind()) {
 		return nil, &packets.ErrInvalidKind{
+			"varint",
 			data.Kind(),
 			reflect.Int,
 		}

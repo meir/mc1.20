@@ -27,11 +27,8 @@ func (p *FloatParser) Unmarshal(data *bufio.Reader, value reflect.Value) error {
 		value = value.Elem()
 	}
 
-	if value.Kind() != p.kind {
-		return &packets.ErrInvalidKind{
-			Kind:   value.Kind(),
-			Wanted: p.kind,
-		}
+	if err := expectKind("float", value, p.kind); err != nil {
+		return err
 	}
 
 	var v float64
@@ -60,11 +57,8 @@ func (p *FloatParser) Marshal(value reflect.Value) ([]byte, error) {
 		value = value.Elem()
 	}
 
-	if value.Kind() != p.kind {
-		return nil, &packets.ErrInvalidKind{
-			Kind:   value.Kind(),
-			Wanted: p.kind,
-		}
+	if err := expectKind("float", value, p.kind); err != nil {
+		return nil, err
 	}
 
 	var v float64

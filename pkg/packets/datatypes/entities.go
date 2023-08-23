@@ -1,4 +1,4 @@
-package objects
+package datatypes
 
 type Entity struct {
 	State         uint8 `packet:"byte"`

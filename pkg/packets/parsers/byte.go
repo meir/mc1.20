@@ -20,12 +20,8 @@ func (bp *ByteParser) Unmarshal(data *bufio.Reader, value reflect.Value) error {
 		value = value.Elem()
 	}
 
-	if value.Kind() != reflect.Uint8 {
-		return &packets.ErrInvalidKind{
-			"byte",
-			value.Kind(),
-			reflect.Uint8,
-		}
+	if err := expectKind("byte", value, reflect.Uint8); err != nil {
+		return err
 	}
 
 	b, err := data.ReadByte()
@@ -43,12 +39,8 @@ func (b *ByteParser) Marshal(value reflect.Value) ([]byte, error) {
 		value = value.Elem()
 	}
 
-	if value.Kind() != reflect.Uint8 {
-		return nil, &packets.ErrInvalidKind{
-			"byte",
-			value.Kind(),
-			reflect.Uint8,
-		}
+	if err := expectKind("byte", value, reflect.Uint8); err != nil {
+		return nil, err
 	}
 
 	return []byte{uint8(value.Uint())}, nil

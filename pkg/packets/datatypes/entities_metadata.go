@@ -1,4 +1,4 @@
-package objects
+package datatypes
 
 type EntityMetadata struct {
 	Index uint8        `packet:"ubyte"`

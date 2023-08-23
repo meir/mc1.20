@@ -24,12 +24,8 @@ func (p *StringParser) Unmarshal(data *bufio.Reader, value reflect.Value) error 
 		value = value.Elem()
 	}
 
-	if value.Kind() != reflect.String {
-		return &packets.ErrInvalidKind{
-			"string",
-			value.Kind(),
-			reflect.String,
-		}
+	if err := expectKind("string", value, reflect.String); err != nil {
+		return err
 	}
 
 	length := 0
@@ -39,13 +35,13 @@ func (p *StringParser) Unmarshal(data *bufio.Reader, value reflect.Value) error 
 	}
 
 	if length < 0 {
-		return &packets.ErrInvalidLength{
+		return &ErrInvalidLength{
 			int(length),
 		}
 	}
 
 	if length > 32767 {
-		return &packets.ErrInvalidLength{
+		return &ErrInvalidLength{
 			int(length),
 		}
 	}
@@ -70,24 +66,20 @@ func (p *StringParser) Marshal(value reflect.Value) ([]byte, error) {
 		value = value.Elem()
 	}
 
-	if value.Kind() != reflect.String {
-		return nil, &packets.ErrInvalidKind{
-			"string",
-			value.Kind(),
-			reflect.String,
-		}
+	if err := expectKind("string", value, reflect.String); err != nil {
+		return nil, err
 	}
 
 	length := int32(len(value.String()))
 
 	if length < 0 {
-		return nil, &packets.ErrInvalidLength{
+		return nil, &ErrInvalidLength{
 			int(length),
 		}
 	}
 
 	if length > 32767 {
-		return nil, &packets.ErrInvalidLength{
+		return nil, &ErrInvalidLength{
 			int(length),
 		}
 	}

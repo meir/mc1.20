@@ -18,6 +18,8 @@ type Connection struct {
 	ProtocolVersion int
 	ServerAddress   string
 	Port            uint16
+
+	Username string
 }
 
 func NewConnection(conn net.Conn) *Connection {
@@ -35,18 +37,18 @@ func (c *Connection) Manage() {
 		err := packets.Unmarshal(reader, &packet)
 		if err != nil {
 			if errors.Is(err, io.EOF) {
-				slog.Info("connection closed")
+				slog.Debug("connection closed")
 				return
 			}
 			slog.Error("failed to unmarshal packet", "err", err)
 		}
 
-		slog.Info("packet received", "length", packet.Length, "id", packet.ID, "state", c.State)
+		slog.Debug("packet received", "length", packet.Length, "id", packet.ID, "state", c.State)
 
 		ok, err := GetHandlers(c.State, PacketId(packet.ID)).Handle(c, reader, packet)
 		if err != nil {
 			if errors.Is(err, io.EOF) {
-				slog.Info("connection closed")
+				slog.Debug("connection closed")
 				return
 			}
 			slog.Error("failed to handle packet", "err", err, "id", packet.ID, "state", c.State)
@@ -64,7 +66,7 @@ func (c *Connection) Write(id PacketId, packet any) error {
 		return err
 	}
 
-	slog.Info("sending packet", "length", len(data), "id", id)
+	slog.Debug("sending packet", "length", len(data), "id", id)
 
 	varintParser := packets.GetParser("varint")
 
@@ -87,6 +89,6 @@ func (c *Connection) Write(id PacketId, packet any) error {
 		return err
 	}
 
-	slog.Info("packet sent", "length", len(data), "id", id)
+	slog.Debug("packet sent", "length", len(data), "id", id)
 	return nil
 }

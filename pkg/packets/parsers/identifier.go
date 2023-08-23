@@ -29,11 +29,8 @@ func (p *IdentifierParser) Unmarshal(data *bufio.Reader, value reflect.Value) er
 		value = value.Elem()
 	}
 
-	if value.Kind() != reflect.String {
-		return &packets.ErrInvalidKind{
-			Kind:   value.Kind(),
-			Wanted: reflect.String,
-		}
+	if err := expectKind("identifier", value, reflect.String); err != nil {
+		return err
 	}
 
 	var s string
@@ -42,7 +39,7 @@ func (p *IdentifierParser) Unmarshal(data *bufio.Reader, value reflect.Value) er
 	}
 
 	if !p.rule.MatchString(s) {
-		return &packets.ErrInvalidValue{
+		return &ErrInvalidValue{
 			Value:  s,
 			Reason: "does not match the rule: " + p.rule.String(),
 		}
@@ -54,15 +51,16 @@ func (p *IdentifierParser) Unmarshal(data *bufio.Reader, value reflect.Value) er
 }
 
 func (p *IdentifierParser) Marshal(value reflect.Value) ([]byte, error) {
-	if value.Kind() != reflect.String {
-		return nil, &packets.ErrInvalidKind{
-			Kind:   value.Kind(),
-			Wanted: reflect.String,
-		}
+	if value.Kind() == reflect.Ptr {
+		value = value.Elem()
+	}
+
+	if err := expectKind("identifier", value, reflect.String); err != nil {
+		return nil, err
 	}
 
 	if !p.rule.MatchString(value.String()) {
-		return nil, &packets.ErrInvalidValue{
+		return nil, &ErrInvalidValue{
 			Value:  value.String(),
 			Reason: "does not match the rule: " + p.rule.String(),
 		}

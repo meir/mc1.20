@@ -3,9 +3,8 @@ package status
 import (
 	"bufio"
 
-	"github.com/meir/mc1.20/pkg/connection"
+	"github.com/meir/mc1.20/internal/pkg/connection"
 	"github.com/meir/mc1.20/pkg/packets"
-	"github.com/meir/mc1.20/pkg/packets/status"
 	"golang.org/x/exp/slog"
 )
 
@@ -14,12 +13,12 @@ func init() {
 }
 
 func HandlePingRequest(conn *connection.Connection, reader *bufio.Reader, packet packets.Packet) (bool, error) {
-	slog.Info("ping request event",
+	slog.Debug("ping request event",
 		"length", packet.Length,
 		"id", packet.ID,
 	)
 
-	pingPacket := status.PacketPingRequest{}
+	pingPacket := PacketPingRequest{}
 	err := packets.Unmarshal(reader, &pingPacket)
 	if err != nil {
 		return false, err
@@ -27,7 +26,7 @@ func HandlePingRequest(conn *connection.Connection, reader *bufio.Reader, packet
 
 	err = conn.Write(
 		connection.PacketId(connection.ClientPacketPingResponse),
-		status.PacketPingResponse{
+		PacketPingResponse{
 			Payload: pingPacket.Payload,
 		},
 	)

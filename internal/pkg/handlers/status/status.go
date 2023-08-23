@@ -4,10 +4,9 @@ import (
 	"bufio"
 	"encoding/json"
 
-	"github.com/meir/mc1.20/pkg/connection"
+	"github.com/meir/mc1.20/internal/pkg/connection"
 	"github.com/meir/mc1.20/pkg/packets"
-	"github.com/meir/mc1.20/pkg/packets/objects"
-	"github.com/meir/mc1.20/pkg/packets/status"
+	"github.com/meir/mc1.20/pkg/packets/datatypes"
 	"golang.org/x/exp/slog"
 )
 
@@ -16,24 +15,26 @@ func init() {
 }
 
 func HandleStatusRequest(conn *connection.Connection, reader *bufio.Reader, packet packets.Packet) (bool, error) {
-	statusResponse := objects.StatusResponse{
-		Version: objects.StatusVersion{
+	statusResponse := datatypes.StatusResponse{
+		Version: datatypes.StatusVersion{
 			Name:     "1.20",
 			Protocol: 763,
 		},
-		Players: objects.StatusPlayers{
-			Max:    100,
-			Online: 0,
+		Players: datatypes.StatusPlayers{
+			Max:    69,
+			Online: 1,
 		},
-		Description: objects.Chat{
-			Text: "Deepfryer bananas",
+		Description: datatypes.Chat{
+			Text:  "This is bananas!",
+			Color: "yellow",
+			Bold:  true,
 		},
 		Favicon:            "",
 		EnforcesSecureChat: false,
 		PreviewsChat:       false,
 	}
 
-	slog.Info("status request event",
+	slog.Debug("status request event",
 		"length", packet.Length,
 		"id", packet.ID,
 	)
@@ -45,7 +46,7 @@ func HandleStatusRequest(conn *connection.Connection, reader *bufio.Reader, pack
 
 	err = conn.Write(
 		connection.PacketId(connection.ClientPacketStatusResponse),
-		status.PacketStatusResponse{
+		PacketStatusResponse{
 			Status: string(statusString),
 		},
 	)

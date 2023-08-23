@@ -5,7 +5,6 @@ import (
 	"reflect"
 
 	"github.com/meir/mc1.20/pkg/packets"
-	"golang.org/x/exp/slices"
 )
 
 func init() {
@@ -27,18 +26,8 @@ func (p *VarintParser) Unmarshal(data *bufio.Reader, value reflect.Value) error 
 		value = value.Elem()
 	}
 
-	if !slices.Contains([]reflect.Kind{
-		reflect.Int,
-		reflect.Int8,
-		reflect.Int16,
-		reflect.Int32,
-		reflect.Int64,
-	}, value.Kind()) {
-		return &packets.ErrInvalidKind{
-			"varint",
-			value.Kind(),
-			reflect.Int,
-		}
+	if err := expectKind("varint", value, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64); err != nil {
+		return err
 	}
 
 	// decode varint
@@ -60,7 +49,7 @@ func (p *VarintParser) Unmarshal(data *bufio.Reader, value reflect.Value) error 
 		pos += 7
 
 		if pos > p.bits {
-			return packets.ErrVarintTooBig
+			return ErrVarintTooBig
 		}
 	}
 
@@ -75,18 +64,8 @@ func (p *VarintParser) Marshal(data reflect.Value) ([]byte, error) {
 		data = data.Elem()
 	}
 
-	if !slices.Contains([]reflect.Kind{
-		reflect.Int,
-		reflect.Int8,
-		reflect.Int16,
-		reflect.Int32,
-		reflect.Int64,
-	}, data.Kind()) {
-		return nil, &packets.ErrInvalidKind{
-			"varint",
-			data.Kind(),
-			reflect.Int,
-		}
+	if err := expectKind("varint", data, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64); err != nil {
+		return nil, err
 	}
 
 	v := data.Int()

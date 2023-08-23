@@ -1,11 +1,18 @@
 package main
 
 import (
+	"os"
+
 	"github.com/meir/mc1.20/internal/server"
-	_ "github.com/meir/mc1.20/pkg/packets/parsers"
+	"golang.org/x/exp/slog"
 )
 
 func main() {
+	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	}))
+	slog.SetDefault(logger)
+
 	s := server.Server{
 		Host: "0.0.0.0",
 		Port: "25565",

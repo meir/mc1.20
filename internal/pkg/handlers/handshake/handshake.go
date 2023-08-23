@@ -3,9 +3,8 @@ package handshake
 import (
 	"bufio"
 
-	"github.com/meir/mc1.20/pkg/connection"
+	"github.com/meir/mc1.20/internal/pkg/connection"
 	"github.com/meir/mc1.20/pkg/packets"
-	"github.com/meir/mc1.20/pkg/packets/handshake"
 	"golang.org/x/exp/slog"
 )
 
@@ -14,7 +13,7 @@ func init() {
 }
 
 func HandleHandshake(conn *connection.Connection, reader *bufio.Reader, packet packets.Packet) (bool, error) {
-	var handshakePacket handshake.PacketHandshake
+	var handshakePacket PacketHandshake
 	err := packets.Unmarshal(reader, &handshakePacket)
 	if err != nil {
 		return false, err
@@ -25,7 +24,7 @@ func HandleHandshake(conn *connection.Connection, reader *bufio.Reader, packet p
 	conn.Port = handshakePacket.ServerPort
 	conn.State = connection.ConnectionState(handshakePacket.NextState)
 
-	slog.Info("handshake event",
+	slog.Debug("handshake event",
 		"length", packet.Length,
 		"id", packet.ID,
 		"protocol_version", handshakePacket.ProtocolVersion,

@@ -6,7 +6,7 @@ import (
 	"reflect"
 
 	"github.com/meir/mc1.20/pkg/packets"
-	"github.com/meir/mc1.20/pkg/packets/objects"
+	"github.com/meir/mc1.20/pkg/packets/datatypes"
 )
 
 func init() {
@@ -16,7 +16,7 @@ func init() {
 				bits: 32,
 			},
 		},
-		reflect.TypeOf(objects.Chat{}),
+		reflect.TypeOf(datatypes.Chat{}),
 	})
 }
 
@@ -30,19 +30,8 @@ func (p *ChatParser) Unmarshal(data *bufio.Reader, value reflect.Value) error {
 		value = value.Elem()
 	}
 
-	if value.Kind() != reflect.Struct {
-		return &packets.ErrInvalidKind{
-			"chat",
-			value.Kind(),
-			reflect.Struct,
-		}
-	}
-
-	if value.Type() != p.chatType {
-		return &packets.ErrInvalidType{
-			value.Type(),
-			p.chatType,
-		}
+	if err := expectType("chat", value, p.chatType); err != nil {
+		return err
 	}
 
 	var s string
@@ -50,7 +39,7 @@ func (p *ChatParser) Unmarshal(data *bufio.Reader, value reflect.Value) error {
 		return err
 	}
 
-	var chat objects.Chat
+	var chat datatypes.Chat
 	if err := json.Unmarshal([]byte(s), &chat); err != nil {
 		return err
 	}
@@ -65,26 +54,15 @@ func (p *ChatParser) Marshal(value reflect.Value) ([]byte, error) {
 		value = value.Elem()
 	}
 
-	if value.Kind() != reflect.Struct {
-		return nil, &packets.ErrInvalidKind{
-			"chat",
-			value.Kind(),
-			reflect.Struct,
-		}
+	if err := expectType("chat", value, p.chatType); err != nil {
+		return nil, err
 	}
 
-	if value.Type() != p.chatType {
-		return nil, &packets.ErrInvalidType{
-			value.Type(),
-			p.chatType,
-		}
-	}
-
-	var chat objects.Chat
+	var chat datatypes.Chat
 	if value.CanAddr() {
-		chat = value.Addr().Interface().(objects.Chat)
+		chat = value.Addr().Interface().(datatypes.Chat)
 	} else {
-		chat = value.Interface().(objects.Chat)
+		chat = value.Interface().(datatypes.Chat)
 	}
 
 	b, err := json.Marshal(chat)

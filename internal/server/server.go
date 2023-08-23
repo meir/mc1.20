@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"net"
 
-	_ "github.com/meir/mc1.20/pkg/connection/handlers/handshake"
-	_ "github.com/meir/mc1.20/pkg/connection/handlers/status"
+	_ "github.com/meir/mc1.20/internal/pkg/handlers/handshake"
+	_ "github.com/meir/mc1.20/internal/pkg/handlers/login"
+	_ "github.com/meir/mc1.20/internal/pkg/handlers/play"
+	_ "github.com/meir/mc1.20/internal/pkg/handlers/status"
 	_ "github.com/meir/mc1.20/pkg/packets/parsers"
 
-	"github.com/meir/mc1.20/pkg/connection"
+	"github.com/meir/mc1.20/internal/pkg/connection"
 	"golang.org/x/exp/slog"
 )
 

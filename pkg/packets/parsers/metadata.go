@@ -5,7 +5,7 @@ import (
 	"reflect"
 
 	"github.com/meir/mc1.20/pkg/packets"
-	"github.com/meir/mc1.20/pkg/packets/objects"
+	"github.com/meir/mc1.20/pkg/packets/datatypes"
 )
 
 func init() {
@@ -15,7 +15,7 @@ func init() {
 	}
 
 	packets.RegisterParser("entity_metadata", &EnitytMetadataParser{
-		reflect.TypeOf(objects.EntityMetadata{}),
+		reflect.TypeOf(datatypes.EntityMetadata{}),
 		byteParser,
 		varintParser,
 	})
@@ -33,22 +33,11 @@ func (p *EnitytMetadataParser) Unmarshal(data *bufio.Reader, value reflect.Value
 		value = value.Elem()
 	}
 
-	if value.Elem().Kind() != reflect.Struct {
-		return &packets.ErrInvalidKind{
-			"metadata",
-			value.Kind(),
-			reflect.Struct,
-		}
+	if err := expectType("metadata", value, p.entityMetadataType); err != nil {
+		return err
 	}
 
-	if value.Type() != p.entityMetadataType {
-		return &packets.ErrInvalidType{
-			value.Type(),
-			p.entityMetadataType,
-		}
-	}
-
-	metadata := objects.EntityMetadata{}
+	metadata := datatypes.EntityMetadata{}
 
 	var b byte
 	if err := p.byteParser.Unmarshal(data, reflect.ValueOf(&b)); err != nil {
@@ -67,7 +56,7 @@ func (p *EnitytMetadataParser) Unmarshal(data *bufio.Reader, value reflect.Value
 		return err
 	}
 
-	metadata.Type = objects.MetadataType(t)
+	metadata.Type = datatypes.MetadataType(t)
 
 	return nil
 }
@@ -77,26 +66,15 @@ func (p *EnitytMetadataParser) Marshal(value reflect.Value) ([]byte, error) {
 		value = value.Elem()
 	}
 
-	if value.Kind() != reflect.Struct {
-		return nil, &packets.ErrInvalidKind{
-			"metadata",
-			value.Kind(),
-			reflect.Struct,
-		}
+	if err := expectType("metadata", value, p.entityMetadataType); err != nil {
+		return nil, err
 	}
 
-	if value.Type() != p.entityMetadataType {
-		return nil, &packets.ErrInvalidType{
-			value.Type(),
-			p.entityMetadataType,
-		}
-	}
-
-	var metadata objects.EntityMetadata
+	var metadata datatypes.EntityMetadata
 	if value.CanAddr() {
-		metadata = value.Addr().Interface().(objects.EntityMetadata)
+		metadata = value.Addr().Interface().(datatypes.EntityMetadata)
 	} else {
-		metadata = value.Interface().(objects.EntityMetadata)
+		metadata = value.Interface().(datatypes.EntityMetadata)
 	}
 
 	if metadata.Index == 0xff {

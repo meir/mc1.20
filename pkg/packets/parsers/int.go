@@ -38,11 +38,8 @@ func (p *IntParser) Unmarshal(data *bufio.Reader, value reflect.Value) error {
 		value = value.Elem()
 	}
 
-	if value.Kind() != p.kind {
-		return &packets.ErrInvalidKind{
-			Kind:   value.Kind(),
-			Wanted: p.kind,
-		}
+	if err := expectKind("int", value, p.kind); err != nil {
+		return err
 	}
 
 	var v int64
@@ -76,11 +73,8 @@ func (p *IntParser) Marshal(value reflect.Value) ([]byte, error) {
 		value = value.Elem()
 	}
 
-	if value.Kind() != p.kind {
-		return nil, &packets.ErrInvalidKind{
-			Kind:   value.Kind(),
-			Wanted: p.kind,
-		}
+	if err := expectKind("int", value, p.kind); err != nil {
+		return nil, err
 	}
 
 	b := make([]byte, p.bits/8)

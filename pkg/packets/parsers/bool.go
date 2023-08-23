@@ -20,12 +20,8 @@ func (p *BoolParser) Unmarshal(data *bufio.Reader, value reflect.Value) error {
 		value = value.Elem()
 	}
 
-	if value.Kind() != reflect.Bool {
-		return &packets.ErrInvalidKind{
-			"bool",
-			value.Kind(),
-			reflect.Bool,
-		}
+	if err := expectKind("bool", value, reflect.Bool); err != nil {
+		return err
 	}
 
 	b, err := data.ReadByte()
@@ -43,12 +39,8 @@ func (p *BoolParser) Marshal(value reflect.Value) ([]byte, error) {
 		value = value.Elem()
 	}
 
-	if value.Kind() != reflect.Bool {
-		return nil, &packets.ErrInvalidKind{
-			"bool",
-			value.Kind(),
-			reflect.Bool,
-		}
+	if err := expectKind("bool", value, reflect.Bool); err != nil {
+		return nil, err
 	}
 
 	var b byte = 0x00

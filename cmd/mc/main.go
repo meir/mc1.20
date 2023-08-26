@@ -3,22 +3,34 @@ package main
 import (
 	"os"
 
-	"github.com/meir/mc1.20/internal/server"
+	_ "github.com/meir/mc1.20/internal/pkg/handlers/handshake"
+	_ "github.com/meir/mc1.20/internal/pkg/handlers/login"
+	_ "github.com/meir/mc1.20/internal/pkg/handlers/play"
+	_ "github.com/meir/mc1.20/internal/pkg/handlers/status"
+	_ "github.com/meir/mc1.20/pkg/packets/parsers"
+
+	"github.com/meir/mc1.20/internal/connection"
 	"golang.org/x/exp/slog"
 )
 
 func main() {
+	// set up logging for debugging
+	// TODO: make this configurable
 	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 		Level: slog.LevelDebug,
 	}))
 	slog.SetDefault(logger)
 
-	s := server.Server{
-		Host: "0.0.0.0",
-		Port: "25565",
+	// TODO: make host and port configurable
+	s, err := connection.NewServer(
+		"0.0.0.0",
+		"25565",
+	)
+	if err != nil {
+		panic(err)
 	}
 
-	err := s.Listen()
+	err = s.Listen()
 	if err != nil {
 		panic(err)
 	}

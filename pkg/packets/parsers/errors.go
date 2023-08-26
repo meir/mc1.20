@@ -32,6 +32,15 @@ func (e *ErrInvalidKind) Error() string {
 }
 
 func expectType(parser string, v reflect.Value, types ...reflect.Type) error {
+	//prevent panic: reflect: call of reflect.Value.IsZero on zero Value
+	if v.Kind() == reflect.Ptr && v.IsNil() {
+		return nil
+	}
+
+	if v.IsZero() {
+		return nil
+	}
+
 	if slices.Contains(types, v.Type()) {
 		return nil
 	}

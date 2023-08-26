@@ -3,7 +3,7 @@ package status
 import (
 	"bufio"
 
-	"github.com/meir/mc1.20/internal/pkg/connection"
+	"github.com/meir/mc1.20/internal/connection"
 	"github.com/meir/mc1.20/pkg/packets"
 	"golang.org/x/exp/slog"
 )

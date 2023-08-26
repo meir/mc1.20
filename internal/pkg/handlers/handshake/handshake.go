@@ -3,7 +3,7 @@ package handshake
 import (
 	"bufio"
 
-	"github.com/meir/mc1.20/internal/pkg/connection"
+	"github.com/meir/mc1.20/internal/connection"
 	"github.com/meir/mc1.20/pkg/packets"
 	"golang.org/x/exp/slog"
 )
@@ -19,6 +19,8 @@ func HandleHandshake(conn *connection.Connection, reader *bufio.Reader, packet p
 		return false, err
 	}
 
+	conn.Mutex.Lock()
+	defer conn.Mutex.Unlock()
 	conn.ProtocolVersion = handshakePacket.ProtocolVersion
 	conn.ServerAddress = handshakePacket.ServerAddress
 	conn.Port = handshakePacket.ServerPort

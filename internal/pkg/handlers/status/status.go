@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 
-	"github.com/meir/mc1.20/internal/pkg/connection"
+	"github.com/meir/mc1.20/internal/connection"
 	"github.com/meir/mc1.20/pkg/packets"
 	"github.com/meir/mc1.20/pkg/packets/datatypes"
 	"golang.org/x/exp/slog"

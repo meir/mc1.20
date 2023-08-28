@@ -1,6 +1,9 @@
 package play
 
-import "github.com/meir/mc1.20/pkg/packets/datatypes"
+import (
+	"github.com/beito123/nbt"
+	"github.com/meir/mc1.20/pkg/packets/datatypes"
+)
 
 type PacketLoginPlay struct {
 	EntityID            int         `packet:"int"`
@@ -8,7 +11,7 @@ type PacketLoginPlay struct {
 	Gamemode            uint8       `packet:"uint8"`
 	PreviousGamemode    uint8       `packet:"uint8"`
 	DimensionNames      []string    `packet:"identifier,array"`
-	RegistryCodec       interface{} `packet:"nbt"` //TODO: implement NBT
+	RegistryCodec       *nbt.Stream `packet:"nbt"`
 	DimensionType       string      `packet:"identifier"`
 	DimensionName       string      `packet:"identifier"`
 	HashedSeed          int64       `packet:"long"`

@@ -7,7 +7,9 @@ import (
 	"fmt"
 
 	"github.com/meir/mc1.20/internal/connection"
+	"github.com/meir/mc1.20/internal/pkg/handlers/play"
 	"github.com/meir/mc1.20/pkg/packets"
+	"github.com/meir/mc1.20/pkg/packets/datatypes"
 	"golang.org/x/exp/slog"
 )
 
@@ -62,6 +64,37 @@ func HandleLoginStart(conn *connection.Connection, reader *bufio.Reader, packet 
 		"id", packet.ID,
 		"username", loginStart.Name,
 	)
+
+	err = conn.Write(connection.PacketId(connection.ClientPacketLoginPlay), play.PacketLoginPlay{
+		EntityID:            0,
+		IsHardcore:          false,
+		Gamemode:            0,
+		PreviousGamemode:    0,
+		DimensionNames:      []string{"minecraft:overworld"},
+		RegistryCodec:       nil,
+		DimensionType:       "minecraft:overworld",
+		DimensionName:       "minecraft:overworld",
+		HashedSeed:          0,
+		MaxPlayers:          0,
+		ViewDistance:        0,
+		SimulationDistance:  0,
+		ReducedDebugInfo:    false,
+		EnableRespawnScreen: false,
+		IsDebug:             false,
+		IsFlat:              false,
+		DeathLocation: struct {
+			Dimension string             `packet:"identifier"`
+			Location  datatypes.Position `packet:"position"`
+		}{
+			Dimension: "minecraft:overworld",
+			Location: datatypes.Position{
+				X: 0,
+				Y: 0,
+				Z: 0,
+			},
+		},
+		PortalCooldown: 0,
+	})
 
 	return true, nil
 }

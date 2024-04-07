@@ -82,10 +82,7 @@ func HandleLoginStart(conn *connection.Connection, reader *bufio.Reader, packet 
 		EnableRespawnScreen: false,
 		IsDebug:             false,
 		IsFlat:              false,
-		DeathLocation: struct {
-			Dimension string             `packet:"identifier"`
-			Location  datatypes.Position `packet:"position"`
-		}{
+		DeathLocation: &play.DeathLocation{
 			Dimension: "minecraft:overworld",
 			Location: datatypes.Position{
 				X: 0,
